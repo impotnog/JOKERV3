@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JOKER</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#020604; --panel:#06110b; --panel2:#08170f; --line:#0f3a22;
+    --g:#00ff66; --g2:#00c853; --text:#d6ffe6; --muted:#6fae8a; --warn:#ffd21a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      linear-gradient(rgba(0,255,102,.045) 1px,transparent 1px) 0 0/100% 34px,
+      linear-gradient(90deg,rgba(0,255,102,.045) 1px,transparent 1px) 0 0/34px 100%,
+      radial-gradient(1100px 600px at 50% -10%, #06301a 0%, var(--bg) 62%);
+    background-attachment:fixed;
+    color:var(--text); font-family:'Share Tech Mono',ui-monospace,monospace;
+    display:flex; flex-direction:column; min-height:100vh;
+  }
+  header{
+    display:flex; align-items:center; gap:14px; padding:10px 18px; flex-wrap:wrap;
+    border-bottom:1px solid var(--g2); background:rgba(0,0,0,.55);
+    position:sticky; top:0; z-index:5; backdrop-filter:blur(6px);
+  }
+  .logo{width:70px;height:70px;flex:none;filter:drop-shadow(0 0 10px rgba(0,255,102,.55))}
+  h1{
+    font-family:'Orbitron',sans-serif; font-weight:900; margin:0; font-size:2.2rem; letter-spacing:8px;
+    color:var(--g); text-shadow:0 0 14px rgba(0,255,102,.7);
+  }
+  .tag{color:var(--muted);font-size:.8rem;letter-spacing:2px;text-transform:uppercase}
+  .spacer{flex:1}
+  button,select,input,textarea{font-family:inherit;color:var(--text);font-size:.95rem}
+  .btn{
+    background:var(--g); border:1px solid var(--g); color:#001a0a; padding:9px 16px; cursor:pointer;
+    border-radius:3px; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.78rem; letter-spacing:1.5px;
+    text-transform:uppercase; box-shadow:0 0 12px rgba(0,255,102,.35); transition:.15s;
+  }
+  .btn:hover{box-shadow:0 0 22px rgba(0,255,102,.7)}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .btn.ghost{background:transparent;color:var(--g);box-shadow:none}
+  .btn.ghost:hover{background:rgba(0,255,102,.1)}
+  .music{display:flex;gap:8px;align-items:center;border:1px solid var(--line);padding:6px 10px;border-radius:4px;background:rgba(0,0,0,.4)}
+  .music .btn{padding:6px 12px}
+  .music select{padding:6px}
+  input[type=range]{accent-color:var(--g);width:80px}
+  .eq{display:flex;gap:2px;align-items:flex-end;height:18px}
+  .eq i{width:3px;background:var(--g);height:4px;opacity:.5}
+  .playing .eq i{animation:eq .6s ease-in-out infinite;opacity:1}
+  .eq i:nth-child(2){animation-delay:.15s!important}.eq i:nth-child(3){animation-delay:.3s!important}.eq i:nth-child(4){animation-delay:.45s!important}
+  @keyframes eq{50%{height:18px}}
+  nav{display:flex;gap:6px;padding:12px 18px 0;flex-wrap:wrap}
+  .tab{
+    background:var(--panel); border:1px solid var(--line); border-bottom:none; padding:9px 18px;
+    cursor:pointer; border-radius:6px 6px 0 0; color:var(--muted); font-family:'Orbitron',sans-serif;
+    font-size:.75rem; letter-spacing:2px; text-transform:uppercase;
+  }
+  .tab.on{background:var(--panel2);color:var(--g);border-color:var(--g2);text-shadow:0 0 8px rgba(0,255,102,.6)}
+  main{flex:1;display:flex;flex-direction:column;margin:0 18px 18px;border:1px solid var(--g2);
+    background:var(--panel2);border-radius:0 6px 6px 6px;min-height:0;overflow:hidden;box-shadow:0 0 30px rgba(0,255,102,.08)}
+  .view{display:none;flex:1;flex-direction:column;min-height:0}
+  .view.on{display:flex}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;padding:12px;border-bottom:1px solid var(--line);align-items:center}
+  select,input[type=text],input[type=password],textarea{
+    background:#030a06;border:1px solid var(--line);border-radius:3px;padding:9px 10px;outline:none
+  }
+  select:focus,input:focus,textarea:focus{border-color:var(--g);box-shadow:0 0 8px rgba(0,255,102,.3)}
+  #msgs,#gallery,#vgallery{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;min-height:240px}
+  .m{max-width:min(800px,94%);padding:11px 14px;border-radius:4px;white-space:pre-wrap;line-height:1.5;word-wrap:break-word}
+  .m.u{align-self:flex-end;background:#0a2a18;border:1px solid var(--g2)}
+  .m.a{align-self:flex-start;background:#040d08;border:1px solid var(--line)}
+  .m small{display:block;color:var(--g);margin-bottom:4px;font-size:.72rem;letter-spacing:2px;font-family:'Orbitron',sans-serif}
+  .m.err{border-color:var(--warn);color:#ffe98a}
+  .m .thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+  .m .thumbs img{height:90px;border:1px solid var(--g2);border-radius:3px}
+  .composer{display:flex;gap:10px;padding:12px;border-top:1px solid var(--line);align-items:flex-end}
+  .composer textarea{flex:1;resize:none;height:54px}
+  #pending{display:flex;gap:8px;padding:8px 12px 0;flex-wrap:wrap}
+  #pending div{position:relative}
+  #pending img{height:56px;border:1px solid var(--g2);border-radius:3px;display:block}
+  #pending b{position:absolute;top:-6px;right:-6px;background:var(--g);color:#000;width:18px;height:18px;border-radius:50%;
+    display:grid;place-items:center;cursor:pointer;font-size:.8rem}
+  #gallery,#vgallery{flex-direction:row;flex-wrap:wrap;align-content:flex-start}
+  #gallery figure,#vgallery figure{margin:0;width:300px;border:1px solid var(--line);background:#030a06;padding:6px}
+  #gallery img,#vgallery video{width:100%;display:block}
+  figcaption{font-size:.75rem;color:var(--muted);padding-top:6px}
+  figcaption a{color:var(--g)}
+  #vstatus{padding:0 16px;color:var(--warn);font-size:.85rem;min-height:1.2em}
+  dialog{background:var(--panel);color:var(--text);border:1px solid var(--g);border-radius:6px;padding:20px;max-width:520px;width:92%;box-shadow:0 0 40px rgba(0,255,102,.25)}
+  dialog::backdrop{background:rgba(0,0,0,.8)}
+  dialog h2{margin-top:0;font-family:'Orbitron';letter-spacing:3px;color:var(--g);font-size:1.1rem}
+  dialog label{display:block;margin:12px 0 4px;font-size:.85rem;color:var(--muted)}
+  dialog input{width:100%}
+  dialog p{font-size:.8rem;color:var(--muted);line-height:1.4}
+  .typing::after{content:"█";animation:blink 1s infinite;color:var(--g)}
+  @keyframes blink{50%{opacity:0}}
+  .node{animation:pulse 2.2s ease-in-out infinite}
+  .eyeL,.eyeR{transform-box:fill-box;transform-origin:center;animation:blinkEye 4.5s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  @keyframes blinkEye{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.08)}}
+  .hat{transform-box:fill-box;transform-origin:50% 100%;animation:sway 3s ease-in-out infinite}
+  @keyframes sway{50%{transform:rotate(2.5deg)}}
+  @media(max-width:600px){h1{font-size:1.5rem;letter-spacing:4px}.logo{width:54px;height:54px}}
+</style>
+</head>
+<body>
+
+<header>
+  <!-- MASCOTE: robô-bobo da corte (desenho original) -->
+  <svg class="logo" viewBox="0 0 300 310" xmlns="http://www.w3.org/2000/svg" aria-label="Mascote Joker">
+    <g class="hat">
+      <path d="M72 104 Q50 72 38 38 Q86 56 122 102 Z" fill="#04140b" stroke="#00ff66" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M120 102 Q140 58 150 22 Q160 58 180 102 Z" fill="#04140b" stroke="#00ff66" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M178 102 Q214 56 262 38 Q250 72 228 104 Z" fill="#04140b" stroke="#00ff66" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M52 56 L70 56 L70 66 M150 40 L150 62 L160 62 M248 56 L230 56 L230 66" stroke="#00c853" stroke-width="2" fill="none"/>
+      <circle class="node" cx="38" cy="38" r="9" fill="#00ff66"/>
+      <circle class="node" cx="150" cy="22" r="9" fill="#00ff66" style="animation-delay:.7s"/>
+      <circle class="node" cx="262" cy="38" r="9" fill="#00ff66" style="animation-delay:1.4s"/>
+    </g>
+    <rect x="66" y="100" width="168" height="24" rx="8" fill="#06110b" stroke="#00ff66" stroke-width="3"/>
+    <g fill="#00ff66"><rect x="84" y="108" width="14" height="8" rx="2"/><rect x="108" y="108" width="14" height="8" rx="2" opacity=".6"/><rect x="132" y="108" width="14" height="8" rx="2"/><rect x="156" y="108" width="14" height="8" rx="2" opacity=".6"/><rect x="180" y="108" width="14" height="8" rx="2"/></g>
+    <!-- cabeça -->
+    <rect x="60" y="124" width="180" height="142" rx="30" fill="#04140b" stroke="#00ff66" stroke-width="3"/>
+    <rect x="40" y="172" width="18" height="46" rx="6" fill="#06110b" stroke="#00ff66" stroke-width="3"/>
+    <rect x="242" y="172" width="18" height="46" rx="6" fill="#06110b" stroke="#00ff66" stroke-width="3"/>
+    <!-- visor -->
+    <rect x="80" y="148" width="140" height="52" rx="22" fill="#000" stroke="#00c853" stroke-width="3"/>
+    <rect class="eyeL" x="98" y="160" width="38" height="28" rx="12" fill="#00ff66"/>
+    <rect class="eyeR" x="164" y="160" width="38" height="28" rx="12" fill="#00ff66"/>
+    <rect x="106" y="165" width="10" height="6" rx="3" fill="#d6ffe6" opacity=".8"/>
+    <rect x="172" y="165" width="10" height="6" rx="3" fill="#d6ffe6" opacity=".8"/>
+    <!-- bochechas com circuito -->
+    <path d="M72 222 H92 V236 H106" stroke="#00c853" stroke-width="2.5" fill="none"/><circle cx="72" cy="222" r="4" fill="#00ff66"/>
+    <path d="M228 222 H208 V236 H194" stroke="#00c853" stroke-width="2.5" fill="none"/><circle cx="228" cy="222" r="4" fill="#00ff66"/>
+    <!-- sorriso LED -->
+    <path d="M104 226 Q150 262 196 226" stroke="#00ff66" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <g stroke="#00ff66" stroke-width="3" stroke-linecap="round" opacity=".85">
+      <path d="M122 234 V242"/><path d="M136 240 V249"/><path d="M150 242 V252"/><path d="M164 240 V249"/><path d="M178 234 V242"/>
+    </g>
+    <!-- gola em zigue-zague -->
+    <polyline points="64,270 86,300 108,270 130,300 152,270 174,300 196,270 218,300 240,270" fill="none" stroke="#00ff66" stroke-width="3" stroke-linejoin="round"/>
+  </svg>
+  <div>
+    <h1>JOKER</h1>
+    <div class="tag">todas as IAs // um só terminal</div>
+  </div>
+  <div class="spacer"></div>
+
+  <div class="music" id="music">
+    <button class="btn" id="mPlay" title="Tocar / pausar">▶</button>
+    <div class="eq"><i></i><i></i><i></i><i></i></div>
+    <select id="mStyle">
+      <option value="synth">Synthwave</option>
+      <option value="chill">Chill Lo-fi</option>
+      <option value="matrix">Matrix</option>
+      <option value="file">Meu arquivo…</option>
+    </select>
+    <input type="range" id="mVol" min="0" max="100" value="45" title="Volume">
+    <input type="file" id="mFile" accept="audio/*" hidden>
+  </div>
+  <button class="btn ghost" id="openCfg">⚙ Chaves</button>
+</header>
+
+<nav>
+  <div class="tab on" data-v="chat">Conversa</div>
+  <div class="tab" data-v="img">Imagem</div>
+  <div class="tab" data-v="vid">Vídeo</div>
+</nav>
+
+<main>
+  <!-- CHAT -->
+  <section class="view on" id="v-chat">
+    <div class="bar">
+      <select id="provider">
+        <option value="claude">Claude</option>
+        <option value="openai">GPT (OpenAI)</option>
+        <option value="gemini">Gemini</option>
+      </select>
+      <input type="text" id="modelName" size="24" title="Nome do modelo (pode editar)">
+      <button class="btn ghost" id="clearChat">Limpar</button>
+    </div>
+    <div id="msgs"></div>
+    <div id="pending"></div>
+    <div class="composer">
+      <button class="btn ghost" id="attach" title="Anexar imagem">📎</button>
+      <input type="file" id="imgFile" accept="image/*" multiple hidden>
+      <textarea id="prompt" placeholder="Pergunta, ou anexa/cola uma imagem pra IA ler... (Enter envia)"></textarea>
+      <button class="btn" id="send">Enviar</button>
+    </div>
+  </section>
+
+  <!-- IMAGEM -->
+  <section class="view" id="v-img">
+    <div class="bar">
+      <input type="text" id="imgModel" size="16" value="gpt-image-1" title="Modelo de imagem">
+      <select id="imgSize">
+        <option value="1024x1024">Quadrada</option>
+        <option value="1536x1024">Horizontal</option>
+        <option value="1024x1536">Vertical</option>
+      </select>
+    </div>
+    <div id="gallery"></div>
+    <div class="composer">
+      <textarea id="imgPrompt" placeholder="Descreve a imagem que você quer..."></textarea>
+      <button class="btn" id="imgGo">Gerar</button>
+    </div>
+  </section>
+
+  <!-- VÍDEO -->
+  <section class="view" id="v-vid">
+    <div class="bar">
+      <select id="vProv">
+        <option value="veo">Veo (Google)</option>
+        <option value="sora">Sora (OpenAI)</option>
+      </select>
+      <input type="text" id="vModel" size="24" title="Modelo de vídeo">
+      <select id="vRatio">
+        <option value="16:9">Horizontal 16:9</option>
+        <option value="9:16">Vertical 9:16</option>
+      </select>
+      <select id="vSecs" title="Duração (só Sora)">
+        <option value="4">4 s</option><option value="8">8 s</option><option value="12">12 s</option>
+      </select>
+    </div>
+    <div id="vstatus"></div>
+    <div id="vgallery"></div>
+    <div class="composer">
+      <textarea id="vPrompt" placeholder="Descreve o vídeo que você quer..."></textarea>
+      <button class="btn" id="vGo">Gerar</button>
+    </div>
+  </section>
+</main>
+
+<dialog id="cfg">
+  <h2>SUAS CHAVES</h2>
+  <p>As chaves ficam salvas só neste navegador (localStorage) e são enviadas apenas para o site de cada IA. Preencha só as que for usar.</p>
+  <label>Anthropic (Claude)</label><input type="password" id="k-claude" placeholder="sk-ant-...">
+  <label>OpenAI (GPT, imagem e Sora)</label><input type="password" id="k-openai" placeholder="sk-...">
+  <label>Google (Gemini e Veo)</label><input type="password" id="k-gemini" placeholder="AIza...">
+  <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+    <button class="btn ghost" id="cfgClose">Fechar</button>
+    <button class="btn" id="cfgSave">Salvar</button>
+  </div>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s);
+const DEFAULT_MODEL = { claude:'claude-sonnet-5-5', openai:'gpt-4o-mini', gemini:'gemini-2.5-flash' };
+const LABEL = { claude:'CLAUDE', openai:'GPT', gemini:'GEMINI' };
+const store = {
+  get(k){ try{ return localStorage.getItem(k) || '' }catch(e){ return '' } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
+};
+let history = [];   // [{role, text, images:[{url,data,mime}]}]
+let pending = [];   // imagens anexadas, ainda não enviadas
+
+/* ---------- abas ---------- */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + t.dataset.v));
+});
+
+/* ---------- chaves ---------- */
+const cfg = $('#cfg');
+$('#openCfg').onclick = () => {
+  ['claude','openai','gemini'].forEach(p => $('#k-'+p).value = store.get('joker_key_'+p));
+  cfg.showModal();
+};
+$('#cfgClose').onclick = () => cfg.close();
+$('#cfgSave').onclick = () => {
+  ['claude','openai','gemini'].forEach(p => store.set('joker_key_'+p, $('#k-'+p).value.trim()));
+  cfg.close();
+};
+
+/* ---------- seletor de modelo (chat) ---------- */
+function syncModel(){
+  const p = $('#provider').value;
+  $('#modelName').value = store.get('joker_model_'+p) || DEFAULT_MODEL[p];
+}
+$('#provider').onchange = syncModel;
+$('#modelName').onchange = () => store.set('joker_model_'+$('#provider').value, $('#modelName').value.trim());
+syncModel();
+
+/* ---------- imagens anexadas ---------- */
+function fileToImg(file){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const max = 1568;
+        const k = Math.min(1, max / Math.max(im.width, im.height));
+        const w = Math.round(im.width * k), h = Math.round(im.height * k);
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(im, 0, 0, w, h);
+        const url = c.toDataURL('image/jpeg', 0.85);
+        res({ url, data: url.split(',')[1], mime: 'image/jpeg' });
+      };
+      im.onerror = rej;
+      im.src = r.result;
+    };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+function renderPending(){
+  const box = $('#pending'); box.innerHTML = '';
+  pending.forEach((img, i) => {
+    const d = document.createElement('div');
+    const im = document.createElement('img'); im.src = img.url;
+    const x = document.createElement('b'); x.textContent = '×';
+    x.onclick = () => { pending.splice(i, 1); renderPending(); };
+    d.append(im, x); box.appendChild(d);
+  });
+}
+async function addFiles(files){
+  for(const f of files){
+    if(!f.type.startsWith('image/')) continue;
+    try{ pending.push(await fileToImg(f)); }catch(e){}
+  }
+  renderPending();
+}
+$('#attach').onclick = () => $('#imgFile').click();
+$('#imgFile').onchange = async e => { await addFiles(e.target.files); e.target.value = ''; };
+$('#prompt').addEventListener('paste', e => {
+  const files = [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith('image/'));
+  if(files.length){ e.preventDefault(); addFiles(files); }
+});
+
+/* ---------- chat ---------- */
+function addMsg(cls, who, text, images){
+  const d = document.createElement('div');
+  d.className = 'm ' + cls;
+  const s = document.createElement('small'); s.textContent = who;
+  d.appendChild(s);
+  if(images && images.length){
+    const t = document.createElement('div'); t.className = 'thumbs';
+    images.forEach(i => { const im = document.createElement('img'); im.src = i.url; t.appendChild(im); });
+    d.appendChild(t);
+  }
+  const b = document.createElement('div'); b.textContent = text;
+  d.appendChild(b);
+  $('#msgs').appendChild(d);
+  $('#msgs').scrollTop = 1e9;
+  return b;
+}
+
+async function askClaude(key, model, msgs){
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({ model, max_tokens:2048,
+      messages: msgs.map(m => ({ role:m.role, content: (m.images?.length)
+        ? [...m.images.map(i => ({type:'image', source:{type:'base64', media_type:i.mime, data:i.data}})), {type:'text', text:m.text}]
+        : m.text })) })
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error?.message || r.status);
+  return j.content.map(c => c.text || '').join('');
+}
+
+async function askOpenAI(key, model, msgs){
+  const r = await fetch('https://api.openai.com/v1/chat/completions', {
+    method:'POST',
+    headers:{ 'content-type':'application/json', 'authorization':'Bearer '+key },
+    body: JSON.stringify({ model,
+      messages: msgs.map(m => ({ role:m.role, content: (m.images?.length)
+        ? [{type:'text', text:m.text}, ...m.images.map(i => ({type:'image_url', image_url:{url:i.url}}))]
+        : m.text })) })
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error?.message || r.status);
+  return j.choices[0].message.content;
+}
+
+async function askGemini(key, model, msgs){
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method:'POST',
+    headers:{ 'content-type':'application/json', 'x-goog-api-key':key },
+    body: JSON.stringify({ contents: msgs.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [...(m.images||[]).map(i => ({inlineData:{mimeType:i.mime, data:i.data}})), {text:m.text}] })) })
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error?.message || r.status);
+  return (j.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('');
+}
+
+const ASK = { claude:askClaude, openai:askOpenAI, gemini:askGemini };
+
+async function send(){
+  let text = $('#prompt').value.trim();
+  const imgs = pending.slice();
+  if(!text && !imgs.length) return;
+  if(!text) text = 'Descreve o que você vê nesta imagem.';
+  const p = $('#provider').value;
+  const model = $('#modelName').value.trim() || DEFAULT_MODEL[p];
+  const key = store.get('joker_key_'+p);
+  if(!key){ addMsg('a err','AVISO','Faltou a chave de ' + LABEL[p] + '. Clica em "⚙ Chaves" lá em cima.'); return; }
+
+  $('#prompt').value = ''; pending = []; renderPending();
+  addMsg('u','VOCÊ', text, imgs);
+  history.push({role:'user', text, images:imgs});
+  const out = addMsg('a', LABEL[p] + ' · ' + model, 'processando');
+  out.classList.add('typing');
+  $('#send').disabled = true;
+  try{
+    const ans = await ASK[p](key, model, history);
+    out.classList.remove('typing');
+    out.textContent = ans || '(resposta vazia)';
+    history.push({role:'assistant', text: ans, images:[]});
+  }catch(e){
+    out.classList.remove('typing');
+    out.parentElement.classList.add('err');
+    out.textContent = 'Erro: ' + e.message;
+    history.pop();
+  }finally{
+    $('#send').disabled = false;
+    $('#msgs').scrollTop = 1e9;
+  }
+}
+$('#send').onclick = send;
+$('#prompt').addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+$('#clearChat').onclick = () => { history = []; pending = []; renderPending(); $('#msgs').innerHTML = ''; };
+
+/* ---------- gerar imagem ---------- */
+async function genImage(){
+  const prompt = $('#imgPrompt').value.trim();
+  if(!prompt) return;
+  const key = store.get('joker_key_openai');
+  if(!key){ alert('Faltou a chave da OpenAI. Clica em "⚙ Chaves".'); return; }
+  const btn = $('#imgGo'); btn.disabled = true; btn.textContent = 'Gerando...';
+  try{
+    const r = await fetch('https://api.openai.com/v1/images/generations', {
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'authorization':'Bearer '+key },
+      body: JSON.stringify({ model: $('#imgModel').value.trim(), prompt, size: $('#imgSize').value, n:1 })
+    });
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error?.message || r.status);
+    const d = j.data[0];
+    const src = d.b64_json ? 'data:image/png;base64,' + d.b64_json : d.url;
+    const fig = document.createElement('figure');
+    const img = document.createElement('img'); img.src = src;
+    const cap = document.createElement('figcaption'); cap.textContent = prompt;
+    fig.append(img, cap);
+    $('#gallery').prepend(fig);
+    $('#imgPrompt').value = '';
+  }catch(e){
+    alert('Erro: ' + e.message);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Gerar';
+  }
+}
+$('#imgGo').onclick = genImage;
+
+/* ---------- gerar vídeo ---------- */
+const V_DEFAULT = { veo:'veo-3.0-generate-001', sora:'sora-2' };
+function syncVideo(){
+  $('#vModel').value = store.get('joker_vmodel_'+$('#vProv').value) || V_DEFAULT[$('#vProv').value];
+  $('#vSecs').style.display = $('#vProv').value === 'sora' ? '' : 'none';
+}
+$('#vProv').onchange = syncVideo;
+$('#vModel').onchange = () => store.set('joker_vmodel_'+$('#vProv').value, $('#vModel').value.trim());
+syncVideo();
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const vStatus = t => $('#vstatus').textContent = t;
+
+async function videoVeo(prompt, model, ratio){
+  const key = store.get('joker_key_gemini');
+  if(!key) throw new Error('Faltou a chave do Google (Gemini). Clica em "⚙ Chaves".');
+  const base = 'https://generativelanguage.googleapis.com/v1beta/';
+  const r = await fetch(`${base}models/${encodeURIComponent(model)}:predictLongRunning`, {
+    method:'POST',
+    headers:{ 'content-type':'application/json', 'x-goog-api-key':key },
+    body: JSON.stringify({ instances:[{prompt}], parameters:{ aspectRatio: ratio } })
+  });
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error?.message || r.status);
+  const op = j.name;
+  for(let i = 0; i < 90; i++){
+    vStatus('Veo trabalhando... ' + (i*8) + 's (costuma levar 1 a 3 minutos)');
+    await sleep(8000);
+    const s = await fetch(base + op, { headers:{ 'x-goog-api-key':key } });
+    const sj = await s.json();
+    if(sj.error) throw new Error(sj.error.message || 'falha na geração');
+    if(sj.done){
+      const uri = sj.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri;
+      if(!uri){
+        const why = sj.response?.generateVideoResponse?.raiMediaFilteredReasons?.[0];
+        throw new Error(why || 'o Veo não devolveu vídeo (pedido pode ter sido bloqueado)');
+      }
+      vStatus('Baixando vídeo...');
+      const v = await fetch(uri, { headers:{ 'x-goog-api-key':key } });
+      if(!v.ok) throw new Error('falha ao baixar o vídeo: ' + v.status);
+      return URL.createObjectURL(await v.blob());
+    }
+  }
+  throw new Error('demorou demais, tenta de novo');
+}
+
+async function videoSora(prompt, model, ratio, secs){
+  const key = store.get('joker_key_openai');
+  if(!key) throw new Error('Faltou a chave da OpenAI. Clica em "⚙ Chaves".');
+  const H = { 'authorization':'Bearer '+key };
+  const r = await fetch('https://api.openai.com/v1/videos', {
+    method:'POST',
+    headers:{ ...H, 'content-type':'application/json' },
+    body: JSON.stringify({ model, prompt, seconds: String(secs), size: ratio === '9:16' ? '720x1280' : '1280x720' })
+  });
+  let j = await r.json();
+  if(!r.ok) throw new Error(j.error?.message || r.status);
+  const id = j.id;
+  for(let i = 0; i < 90 && j.status !== 'completed'; i++){
+    if(j.status === 'failed') throw new Error(j.error?.message || 'falha na geração');
+    vStatus('Sora trabalhando... ' + (j.progress ?? 0) + '%');
+    await sleep(6000);
+    j = await (await fetch('https://api.openai.com/v1/videos/' + id, { headers:H })).json();
+  }
+  if(j.status !== 'completed') throw new Error('demorou demais, tenta de novo');
+  vStatus('Baixando vídeo...');
+  const v = await fetch(`https://api.openai.com/v1/videos/${id}/content`, { headers:H });
+  if(!v.ok) throw new Error('falha ao baixar o vídeo: ' + v.status);
+  return URL.createObjectURL(await v.blob());
+}
+
+async function genVideo(){
+  const prompt = $('#vPrompt').value.trim();
+  if(!prompt) return;
+  const prov = $('#vProv').value, model = $('#vModel').value.trim() || V_DEFAULT[prov];
+  const btn = $('#vGo'); btn.disabled = true; btn.textContent = 'Gerando...';
+  try{
+    vStatus('Enviando pedido...');
+    const url = prov === 'veo'
+      ? await videoVeo(prompt, model, $('#vRatio').value)
+      : await videoSora(prompt, model, $('#vRatio').value, $('#vSecs').value);
+    const fig = document.createElement('figure');
+    const v = document.createElement('video'); v.src = url; v.controls = true; v.loop = true;
+    const cap = document.createElement('figcaption');
+    cap.textContent = prompt + ' · ';
+    const a = document.createElement('a'); a.href = url; a.download = 'joker-video.mp4'; a.textContent = 'baixar';
+    cap.appendChild(a);
+    fig.append(v, cap);
+    $('#vgallery').prepend(fig);
+    $('#vPrompt').value = '';
+    vStatus('');
+  }catch(e){
+    vStatus('Erro: ' + e.message);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Gerar';
+  }
+}
+$('#vGo').onclick = genVideo;
+
+/* ---------- música ---------- */
+const Music = (() => {
+  const S = {
+    synth :{ bpm:108, root:33, arp:[0,3,7,12,7,3,10,7],  bars:[0,0,-4,-2], wave:'sawtooth', kick:true,  vol:.5 },
+    chill :{ bpm:76,  root:36, arp:[0,4,7,11,7,4,9,7],   bars:[0,5,3,7],   wave:'triangle', kick:false, vol:.7 },
+    matrix:{ bpm:132, root:31, arp:[0,0,12,0,7,0,10,0],  bars:[0,0,3,-2],  wave:'square',   kick:true,  vol:.35 }
+  };
+  let ctx, master, timer, step = 0, next = 0, style = 'synth', playing = false, noiseBuf, audio = null, vol = .45;
+  const mtof = n => 440 * Math.pow(2, (n - 69) / 12);
+
+  function init(){
+    if(ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = vol * .6; master.connect(ctx.destination);
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * .2, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0); for(let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  function tone(f, t, dur, type, v, cutoff){
+    const o = ctx.createOscillator(), g = ctx.createGain(), fl = ctx.createBiquadFilter();
+    o.type = type; o.frequency.value = f;
+    fl.type = 'lowpass'; fl.frequency.value = cutoff;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(v, t + .01);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(fl); fl.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + .05);
+  }
+  function kick(t){
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(40, t + .12);
+    g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.001, t + .22);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + .25);
+  }
+  function hat(t){
+    const s = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    s.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = 7000;
+    g.gain.setValueAtTime(.18, t); g.gain.exponentialRampToValueAtTime(.001, t + .05);
+    s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t + .08);
+  }
+  function schedule(){
+    const c = S[style], spb = 60 / c.bpm / 4;
+    while(next < ctx.currentTime + .15){
+      const i = step % 16, bar = Math.floor(step / 16), off = c.bars[bar % 4];
+      if(c.kick && i % 4 === 0) kick(next);
+      if(i % 2 === 1) hat(next);
+      if(i % 4 === 0 || i === 6 || i === 14) tone(mtof(c.root + off), next, spb * 2.6, c.wave, .35 * c.vol, 500);
+      if(i % 2 === 0) tone(mtof(c.root + 24 + off + c.arp[(i / 2) % 8]), next, spb * (style === 'chill' ? 3.5 : 1.8), c.wave, .16 * c.vol, 2600);
+      next += spb; step++;
+    }
+  }
+  function setVol(v){ vol = v; if(master) master.gain.value = v * .6; if(audio) audio.volume = v; }
+  function play(){
+    playing = true;
+    if(style === 'file' && audio){ audio.play(); return; }
+    init(); ctx.resume(); step = 0; next = ctx.currentTime + .05;
+    timer = setInterval(schedule, 25);
+  }
+  function stop(){
+    playing = false; clearInterval(timer);
+    if(audio) audio.pause();
+  }
+  return {
+    toggle(){ playing ? stop() : play(); return playing; },
+    isPlaying: () => playing,
+    setStyle(s){ const was = playing; if(was) stop(); style = s; if(was) play(); },
+    setVol,
+    loadFile(file){
+      if(audio){ audio.pause(); URL.revokeObjectURL(audio.src); }
+      audio = new Audio(URL.createObjectURL(file)); audio.loop = true; audio.volume = vol;
+    },
+    hasFile: () => !!audio
+  };
+})();
+
+const mPlay = $('#mPlay'), mStyle = $('#mStyle');
+function paintMusic(){
+  const on = Music.isPlaying();
+  mPlay.textContent = on ? '❚❚' : '▶';
+  $('#music').classList.toggle('playing', on);
+}
+mPlay.onclick = () => {
+  if(mStyle.value === 'file' && !Music.hasFile()){ $('#mFile').click(); return; }
+  Music.toggle(); paintMusic();
+};
+let lastStyle = 'synth';
+mStyle.onchange = () => {
+  if(mStyle.value === 'file'){ $('#mFile').click(); return; }
+  lastStyle = mStyle.value; Music.setStyle(mStyle.value); paintMusic();
+};
+$('#mFile').onchange = e => {
+  const f = e.target.files[0];
+  if(!f){ mStyle.value = lastStyle; return; }
+  Music.loadFile(f);
+  Music.setStyle('file');
+  if(!Music.isPlaying()) Music.toggle();
+  paintMusic();
+  e.target.value = '';
+};
+$('#mVol').oninput = e => Music.setVol(e.target.value / 100);
+Music.setVol(.45);
+
+addMsg('a','JOKER','Sistema online. Põe suas chaves em "⚙ Chaves", escolhe a IA, e manda texto ou imagem. Música no canto de cima, se quiser clima.');
+</script>
+</body>
+</html>
